@@ -1,0 +1,1 @@
+[s,R,T,e,it] = reg3D('bun045.asc','bun000.asc')
