@@ -65,12 +65,14 @@ HA_data = ({colH;HA_value});
 LA_data = ({colL;LA_value});
 
 %% use reg_3D
-% matlab的毛病，这里要强制类型转换
+%得到的R，T可以直接用于LA变换到HA
+%matlab的毛病，这里要强制类型转换
 [s,R,T,e,it] = reg3D(HA_data,LA_data,int8(100))
 
 %% using solved R and T to register
 % size of register_LA is n-dimension * number of points
-register_LA = [R,T]\LA_value;
+Onerow = ones(1,colL);
+register_LA = [R,T]*[LA_value;Onerow];
 figure(2);
 scatter3(x1,y1,z1,'b','.');hold on;
 scatter3(register_LA(1,:)',register_LA(2,:)',register_LA(3,:)','.');

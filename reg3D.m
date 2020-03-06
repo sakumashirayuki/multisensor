@@ -30,18 +30,18 @@ s0 = initD{3};
 I = initD{4};
 
 %进行delaunay三角剖分
-Yo = delaunayn(Y');
+% Yo = delaunayn(Y');
 
 tic;
 %迭代求解部分
-c0 = Solvecircle(s0,R0,T0,I,X,Y,Yo);
+c0 = Solvecircle(s0,R0,T0,I,X,Y);
 Rn = c0{1};
 Tn = c0{2};
 sn = c0{3};
 etemp = c0{5};%当前误差
 flag = 2;%迭代次数
 while (etemp>p.Results.error)
-    c = Solvecircle(sn,Rn,Tn,I,X,Y,Yo);
+    c = Solvecircle(sn,Rn,Tn,I,X,Y);
     Rn = c{1};
     Tn = c{2};
     sn = c{3};
