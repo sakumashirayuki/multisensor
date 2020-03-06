@@ -1,5 +1,4 @@
 % ÓÃÓÚ·ÂÕæ
-clear;
 %% set up coordinates
 %HA dataset
 Width1 = 5;
@@ -69,11 +68,5 @@ LA_data = ({colL;LA_value});
 [s,R,T,e,it] = reg3D(HA_data,LA_data,int8(100))
 
 %% using solved R and T to register
-% size of register_LA is n-dimension * number of points
-register_LA = [R,T]\LA_value;
-figure(2);
-scatter3(x1,y1,z1,'b','.');hold on;
-scatter3(register_LA(1,:)',register_LA(2,:)',register_LA(3,:)','.');
-xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
-axis([-5 5 -5 5]);
-title('multisensor data after registering');
+% size of register_LA is 3
+register_LA = 
