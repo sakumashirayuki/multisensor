@@ -29,9 +29,6 @@ T0 = initD{2};
 s0 = initD{3};
 I = initD{4};
 
-%进行delaunay三角剖分
-% Yo = delaunayn(Y');
-
 tic;
 %迭代求解部分
 c0 = Solvecircle(s0,R0,T0,I,X,Y);

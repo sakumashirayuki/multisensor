@@ -1,6 +1,9 @@
 function c = Solvecircle(s,R,T,I,X,Y)
 % 输入参数有修改
 % 是让Y变换为X
+% 替换了找最近点的方法
+% 原本delaunayn对应dsearchn
+% 现在createns对应knnsearch
 
 pointx = length(X(1,:));
 pointy = length(Y(1,:));
@@ -11,10 +14,15 @@ Yo = s*R*Y+repmat(T,[1 pointy]);
 
 %dsearchn求Z,即Yo(变化后)中对应X的数据
 %先对变换后的Y进行三角剖分
-Y_tri = delaunayn(Yo');
+% Y_tri = delaunayn(Yo');
+
+%另一种寻找最近点的方法
+Y_tri = createns(Yo','NSMethod','kdtree');
+
 %一个最近点search算法
 %返回的是Yo中的点下标
-k = dsearchn(Yo',Y_tri,X');
+% k = dsearchn(Yo',Y_tri,X');
+k = knnsearch(Y_tri,X');
 Z = Yo(:,k);
 
 %计算当前ek差值
