@@ -20,6 +20,9 @@ p.addOptional('iter',10,@(x)validateattributes(x,{'int8'},{'nonzero'}));
 p.addOptional('error',0.001,@(x)validateattributes(x,{'double'},{'nonzero'}));
 p.parse(data1,data2,varargin{:});
 
+%存储误差
+e_record = zeros(1,p.Results.iter);
+
 X = p.Results.data1{2};
 Y = p.Results.data2{2};
 
@@ -36,6 +39,7 @@ Rn = c0{1};
 Tn = c0{2};
 sn = c0{3};
 etemp = c0{5};%当前误差
+e_record(1)=etemp;
 flag = 2;%迭代次数
 while (etemp>p.Results.error)
     c = Solvecircle(sn,Rn,Tn,I,X,Y);
@@ -43,13 +47,16 @@ while (etemp>p.Results.error)
     Tn = c{2};
     sn = c{3};
     en = c{5};%变换后的误差
+    e_record(flag)=en;
     % q = 1 - en/etemp;
     etemp = en;
     if flag>=p.Results.iter
         break;%大于迭代次数则退出
     end
     flag = flag + 1; 
-end 
+end
+%绘制误差变化图像
+plot_error(e_record);
 s = sn;
 R = Rn;
 T = Tn;
