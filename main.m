@@ -1,5 +1,6 @@
 % 用于仿真
 clear;
+close all;
 %% set up coordinates
 %HA dataset
 Width1 = 5;
@@ -64,15 +65,25 @@ LA_value = [mx2';my2';mz2'];
 HA_data = ({colH;HA_value});
 LA_data = ({colL;LA_value});
 
-%% use reg_3D
-%得到的R，T可以直接用于LA变换到HA
-%matlab的毛病，这里要强制类型转换
-[s,R,T,e,it] = reg3D(HA_data,LA_data,int8(100))
+%%  calculate R and t
+method = 'icp_3dbasic';
+switch method
+    case 'reg3D'
+        %use reg_3D
+        %得到的R，T可以直接用于LA变换到HA
+        %matlab的毛病，这里要强制类型转换
+        [s,R,T,e,it] = reg3D(HA_data,LA_data,int8(100))
+    case 'icp_3dbasic'
+        %use icp_3dbasic
+        %LA变换为HA
+        [~, R,T]=icp_3dbasic(HA_value', LA_value');
+    otherwise
+        print('error');
+end
 
 %% using solved R and T to register
-% size of register_LA is n-dimension * number of points
-Onerow = ones(1,colL);
-register_LA = [R,T]*[LA_value;Onerow];
+register_LA = pointRegister(LA_value,R,T,method);
+
 figure(2);
 scatter3(x1,y1,z1,'b','.');hold on;
 scatter3(register_LA(1,:)',register_LA(2,:)',register_LA(3,:)','.');
