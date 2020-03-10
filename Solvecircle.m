@@ -1,7 +1,10 @@
-function c = Solvecircle(s,R,T,I,X,Y)
+function c = Solvecircle(I,X,Y)
 % 输入参数有修改
+% 输入的Y已是变换后的
 % 是让Y变换为X
 % 替换了找最近点的方法
+% 增加输出值：变换后的Yn
+% 输出值{Rn;Tn;sn;fn;Yn}
 % 原本delaunayn对应dsearchn
 % 现在createns对应knnsearch
 
@@ -9,25 +12,21 @@ pointx = length(X(1,:));
 pointy = length(Y(1,:));
 
 %Y进行变化Y--Yo--接近X
-%Xo = s*R*X+repmat(T,[1 pointx]);
-Yo = s*R*Y+repmat(T,[1 pointy]);
+%Yo = s*R*Y+repmat(T,[1 pointy]);
 
 %dsearchn求Z,即Yo(变化后)中对应X的数据
 %先对变换后的Y进行三角剖分
 % Y_tri = delaunayn(Yo');
 
 %另一种寻找最近点的方法
-Y_tri = createns(Yo','NSMethod','kdtree');
+Y_tri = createns(Y','NSMethod','kdtree');
 
 %一个最近点search算法
 %返回的是Yo中的点下标
 % k = dsearchn(Yo',Y_tri,X');
 k = knnsearch(Y_tri,X');
-Z = Yo(:,k);
+Z = Y(:,k);
 
-%计算当前ek差值
-%第四个参数是变换前的数据点(Z)，第五个参数是目标数据点(X)
-en = computeE(s,R,T,Z,X);
 %计算H矩阵
 zc = mean(Z,2);
 xc = mean(X,2); %xc,zc为坐标中点
@@ -45,7 +44,9 @@ sn = computeS(I,Rn,Zi,Xi);
 Tn = computeT(xc,sn,Rn,zc);
 %对于k+1数据的e，fn
 fn = computeE(sn,Rn,Tn,Z,X);
-c = cell({Rn;Tn;sn;en;fn});
+
+Yn = sn*Rn*Y+repmat(Tn,[1 pointy]);
+c = cell({Rn;Tn;sn;fn;Yn});
 end
  
 %计算Rk+1

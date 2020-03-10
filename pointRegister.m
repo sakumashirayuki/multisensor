@@ -15,6 +15,6 @@ switch method
         %register_LA is number of points*n-dimension
         register_LA = register_LA';
     otherwise
-        print('error');
+        fprintf('error');
 end
 end

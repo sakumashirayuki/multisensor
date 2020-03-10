@@ -1,4 +1,4 @@
-function [s,R,T,e,it]=reg3D(data1,data2,varargin)
+function [s,e,it,Yn]=reg3D(data1,data2,varargin)
 %变换data1去接近data2
 %改为变换data2去接近data1
 %data1的点少于data2
@@ -9,7 +9,8 @@ function [s,R,T,e,it]=reg3D(data1,data2,varargin)
 %it 迭代次数
 %新输入：2*1d cell,cell{1}为点个数，cell{2}储存点的坐标，大小为n维*点数
 %迭代次数：默认10次
-%收敛误差
+%收敛误差:默认0.001
+%显示最终位置的点云
 
 %输入参数处理，data1和data2
 p=inputParser;
@@ -31,24 +32,26 @@ R0 = initD{1};
 T0 = initD{2};
 s0 = initD{3};
 I = initD{4};
+Y0 = initD{5};%取出PCA初配准后的Y
 
 tic;
 %迭代求解部分
-c0 = Solvecircle(s0,R0,T0,I,X,Y);
+c0 = Solvecircle(I,X,Y0);
 Rn = c0{1};
 Tn = c0{2};
 sn = c0{3};
-etemp = c0{5};%当前误差
+etemp = c0{4};%当前误差
+Yn=c0{5};%当前的Y
 e_record(1)=etemp;
 flag = 2;%迭代次数
 while (etemp>p.Results.error)
-    c = Solvecircle(sn,Rn,Tn,I,X,Y);
+    c = Solvecircle(I,X,Yn);
     Rn = c{1};
     Tn = c{2};
     sn = c{3};
-    en = c{5};%变换后的误差
+    en = c{4};%变换后的误差
+    Yn = c{5};%更新点云
     e_record(flag)=en;
-    % q = 1 - en/etemp;
     etemp = en;
     if flag>=p.Results.iter
         break;%大于迭代次数则退出
@@ -57,11 +60,19 @@ while (etemp>p.Results.error)
 end
 %绘制误差变化图像
 plot_error(e_record);
+fprintf("the last iter:");
 s = sn;
 R = Rn;
 T = Tn;
 e = en;
 it = flag - 1;
 toc 
+%显示最终变换位置的点云Yn图像
+figure;
+scatter3(X(1,:)',X(2,:)',X(3,:)','b','.');hold on;
+scatter3(Yn(1,:)',Yn(2,:)',Yn(3,:)','r','.');
+xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
+axis([-5 5 -5 5]);
+title('multisensor data after registering');
 end
 

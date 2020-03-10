@@ -1,4 +1,7 @@
 function result = init(data1,data2)
+%X和Y的尺寸为维度*点数
+%result包括R;T;s;I，这里再包括经过初始变换后的结果
+%register_X: n-dimension*number of points
 pointx = data1{1};
 X = data1{2};
 pointy = data2{1};
@@ -33,7 +36,8 @@ p2 = Vx(:,2);
 q1 = Vy(:,1);
 q2 = Vy(:,2);
 q3 = Vy(:,3);
-f = 0.8;  %f是什么？
+% f = 0.8;  %f是什么？
+f=0.1;
 %调整向量方向(为什么以f为标准，为何反向)
 if dot(p1,q1) < f
     p1 = -p1;
@@ -49,4 +53,17 @@ R = [q1,q2,q3]*inv([p1,p2,p3]);
 %平移矩阵T = (yc - xc);
 xc2 = mean(s*R*X,2);
 T = (yc - xc2);
-result = cell({R;T;s;I});
+
+%显示初始位姿：
+[~,rowL]=size(X);%rowL为点数
+Onerow = ones(1,rowL);
+register_X = s*R*X+repmat(T,[1 pointx]);
+figure;
+scatter3(Y(1,:)',Y(2,:)',Y(3,:)','b','.');hold on;
+scatter3(register_X(1,:)',register_X(2,:)',register_X(3,:)','.');
+xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
+axis([-5 5 -5 5]);
+title('the pca initial position');
+
+
+result = cell({R;T;s;I;register_X});

@@ -49,7 +49,20 @@ options.TolFun = 0.0001;%函数容差TolFun
 options.TolX = 0.00001;%当前点的中止容差TolX
 options.DiffMinChange = .001;%有限差分中的最小变化量
 options.LargeScale = 'on';%LargeScale指进行大范围搜索
-params = [0 0 0 1 0 0 0]; % quat, tx, ty, tz待求参量的起始点？
+%PCA粗匹配得到初始值
+[numberx,~]=size(lmdata.dataX);
+[numbery,~]=size(lmdata.dataY);
+initX = ({numberx;lmdata.dataX'});
+initY = ({numbery;lmdata.dataY'});
+initD = init(initY,initX);
+R0 = initD{1};
+R0 = R0';
+T0 = initD{2};
+T0=T0';
+quat = dcm2quat(R0);
+params = [0 0 0 1 0 0 0]; % quat, tx, ty, tz待求参量的初始值
+%params = [quat,T0];
+
 
 %@(X)中X为待优化的变量 
 %icp_3derror(X, lmdata)为最小化目标的差值

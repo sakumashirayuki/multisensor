@@ -1,12 +1,12 @@
 function b = ascread(filename)      %read my file
 format long;
-fi = fopen(filename,'r');       %openfile
+fi = fopen(filename,'r');       %openfile  'r'读出参数
 if fi < 0
   error(sprintf('File %s not found', filename))
 end
 
 templine = 1; %
-a = sscanf(fgetl(fi), '%d');
+a = sscanf(fgetl(fi), '%d');%%fgetl从已经打开的文件中读取一行，并且丢掉末尾的换行符。
 templine = templine +1;
 
 if length(a)==1

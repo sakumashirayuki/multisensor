@@ -66,27 +66,27 @@ HA_data = ({colH;HA_value});
 LA_data = ({colL;LA_value});
 
 %%  calculate R and t
-method = 'icp_3dbasic';
+method = 'reg3D';
 switch method
     case 'reg3D'
         %use reg_3D
-        %得到的R，T可以直接用于LA变换到HA
+        %直接得到最终的点云图Yn
         %matlab的毛病，这里要强制类型转换
-        [s,R,T,e,it] = reg3D(HA_data,LA_data,int8(100))
+        [s,e,it,Yn] = reg3D(HA_data,LA_data,int8(100));
     case 'icp_3dbasic'
         %use icp_3dbasic
         %LA变换为HA
         [~, R,T]=icp_3dbasic(HA_value', LA_value');
     otherwise
-        print('error');
+        fprintf('error');
 end
 
 %% using solved R and T to register
-register_LA = pointRegister(LA_value,R,T,method);
-
-figure(2);
-scatter3(x1,y1,z1,'b','.');hold on;
-scatter3(register_LA(1,:)',register_LA(2,:)',register_LA(3,:)','.');
-xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
-axis([-5 5 -5 5]);
-title('multisensor data after registering');
+% register_LA = pointRegister(LA_value,R,T,method);
+% 
+% figure;
+% scatter3(x1,y1,z1,'b','.');hold on;
+% scatter3(register_LA(1,:)',register_LA(2,:)',register_LA(3,:)','.');
+% xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
+% axis([-5 5 -5 5]);
+% title('multisensor data after registering');
