@@ -34,6 +34,27 @@ z1 = z1 + HA_noise;
 LA_noise = normrnd(0,0.015,size(x2));
 z2 = z2 + LA_noise;
 
+%移动前，并计算误差
+figure(1);
+scatter3(x1,y1,z1,'b','.');hold on;
+scatter3(x2,y2,z2,'r','.');
+xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
+axis([-5 5 -5 5]);
+title('before moving');
+
+HA_value = [x1';y1';z1'];
+LA_value = [x2';y2';z2'];
+HA_tri = createns(HA_value','NSMethod','kdtree');
+k = knnsearch(HA_tri,LA_value');
+% k = knnsearch(LA_value',HA_value');
+find_HA = HA_value(:,k);
+
+%计算误差
+c=find_HA-LA_value;
+e=mean(dot(c,c));
+fprintf("error before moving");
+e = sqrt(e)
+
 %% move LA data
 [colL,rowL]=size(x2);
 alpha = -0.1;
@@ -51,7 +72,7 @@ mx2 = move(:,1);
 my2 = move(:,2);
 mz2 = move(:,3);
 
-figure(1);
+figure(2);
 scatter3(x1,y1,z1,'b','.');hold on;
 scatter3(mx2,my2,mz2,'r','.');
 xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
@@ -66,13 +87,13 @@ HA_data = ({colH;HA_value});
 LA_data = ({colL;LA_value});
 
 %%  calculate R and t
-method = 'reg3D';
+method ='reg3D';
 switch method
     case 'reg3D'
         %use reg_3D
         %直接得到最终的点云图Yn
         %matlab的毛病，这里要强制类型转换
-        [s,e,it,Yn] = reg3D(HA_data,LA_data,int8(100));
+        [s,e,it,Yn] = reg3D(HA_data,LA_data,int64(400));
     case 'icp_3dbasic'
         %use icp_3dbasic
         %LA变换为HA

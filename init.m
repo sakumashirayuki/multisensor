@@ -51,19 +51,23 @@ p3 = cross(p1,p2);
 R = [q1,q2,q3]*inv([p1,p2,p3]);
 
 %平移矩阵T = (yc - xc);
-xc2 = mean(s*R*X,2);
+% xc2 = mean(s*R*X,2);
+% T = (yc - xc2);
+
+%去掉了缩放因子
+xc2 = mean(R*X,2);
 T = (yc - xc2);
 
 %显示初始位姿：
 [~,rowL]=size(X);%rowL为点数
 Onerow = ones(1,rowL);
-register_X = s*R*X+repmat(T,[1 pointx]);
+%register_X = s*R*X+repmat(T,[1 pointx]);
+register_X = R*X+repmat(T,[1 pointx]);
 figure;
 scatter3(Y(1,:)',Y(2,:)',Y(3,:)','b','.');hold on;
 scatter3(register_X(1,:)',register_X(2,:)',register_X(3,:)','.');
 xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
 axis([-5 5 -5 5]);
 title('the pca initial position');
-
 
 result = cell({R;T;s;I;register_X});

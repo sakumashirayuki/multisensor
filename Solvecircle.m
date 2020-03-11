@@ -1,51 +1,51 @@
 function c = Solvecircle(I,X,Y)
-% 输入参数有修改
 % 输入的Y已是变换后的
-% 是让Y变换为X
+% 输入：n维*点数
 % 替换了找最近点的方法
 % 增加输出值：变换后的Yn
 % 输出值{Rn;Tn;sn;fn;Yn}
 % 原本delaunayn对应dsearchn
 % 现在createns对应knnsearch
+% 去掉了缩放因子
 
 pointx = length(X(1,:));
 pointy = length(Y(1,:));
 
 %Y进行变化Y--Yo--接近X
-%Yo = s*R*Y+repmat(T,[1 pointy]);
 
-%dsearchn求Z,即Yo(变化后)中对应X的数据
-%先对变换后的Y进行三角剖分
-% Y_tri = delaunayn(Yo');
+%dsearchn求X,即X中对应Yo(变化后)的数据
 
 %另一种寻找最近点的方法
-Y_tri = createns(Y','NSMethod','kdtree');
+X_tri = createns(X','NSMethod','kdtree');
 
 %一个最近点search算法
-%返回的是Yo中的点下标
+%返回的是X中的点下标
+%不进行createns处理
 % k = dsearchn(Yo',Y_tri,X');
-k = knnsearch(Y_tri,X');
-Z = Y(:,k);
+k = knnsearch(X_tri,Y');
+% k = knnsearch(Y',X');
+Z = X(:,k);
 
 %计算H矩阵
 zc = mean(Z,2);
-xc = mean(X,2); %xc,zc为坐标中点
+yc = mean(Y,2); %yc,zc为坐标中点
 %H = zeros(3,3);
 % 计算Xi,Zi
-Zi = Z - repmat(zc,[1 pointx]);
-Xi = X - repmat(xc,[1 pointx]);
+Zi = Z - repmat(zc,[1 pointy]);
+Yi = Y - repmat(yc,[1 pointy]);
 
 %更新变换矩阵
 %计算Rk+1
-Rn = computeR(Zi,Xi);
+Rn = computeR(Yi,Zi);
 %计算s-k+1 
-sn = computeS(I,Rn,Zi,Xi);
+sn = computeS(I,Rn,Yi,Zi);
 %计算Tk+1
-Tn = computeT(xc,sn,Rn,zc);
+% Tn = computeT(xc,sn,Rn,zc);
+Tn = computeT(zc,Rn,yc);
 %对于k+1数据的e，fn
-fn = computeE(sn,Rn,Tn,Z,X);
+fn = computeE(Rn,Tn,Y,Z);
 
-Yn = sn*Rn*Y+repmat(Tn,[1 pointy]);
+Yn = Rn*Y+repmat(Tn,[1 pointy]);
 c = cell({Rn;Tn;sn;fn;Yn});
 end
  
@@ -74,18 +74,6 @@ end
 
 
 %计算Tk+1
-function Tn = computeT(zc,sn,Rn,xc)
-Tn = zc - sn*Rn*xc;
-end
-
-
-%计算Ek+1
-%原误差的算法：所有点欧式距离之和
-%现误差算法：RMS
-function e = computeE(s,R,T,X,Z) 
-pointx = length(X(1,:));
-c = s.*(R*X)+repmat(T,[1 pointx])-Z;
-%e = sum(dot(c,c));
-e=mean(dot(c,c));
-e = sqrt(e);
+function Tn = computeT(zc,Rn,xc)
+Tn = zc - Rn*xc;
 end
