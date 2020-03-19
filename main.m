@@ -93,7 +93,7 @@ switch method
         %use reg_3D
         %直接得到最终的点云图Yn
         %matlab的毛病，这里要强制类型转换
-        [s,e,it,Yn] = reg3D(HA_data,LA_data,int64(400));
+        [s,e,it,Yn] = reg3D(HA_data,LA_data,int64(500));
     case 'icp_3dbasic'
         %use icp_3dbasic
         %LA变换为HA
@@ -102,12 +102,42 @@ switch method
         fprintf('error');
 end
 
-%% using solved R and T to register
-% register_LA = pointRegister(LA_value,R,T,method);
-% 
-% figure;
-% scatter3(x1,y1,z1,'b','.');hold on;
-% scatter3(register_LA(1,:)',register_LA(2,:)',register_LA(3,:)','.');
-% xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
-% axis([-5 5 -5 5]);
-% title('multisensor data after registering');
+%% data fusion
+% 在LA(Yn)的范围内取HA(HA_value)的点
+Minmum = min(Yn,[],2);
+minx = Minmum(1);
+miny = Minmum(2);
+Maxmum = max(Yn,[],2);
+maxx = Maxmum(1);
+maxy = Maxmum(2);
+[~,ind_X] = find(HA_value(1,:)>=minx & HA_value(1,:)<=maxx);
+xScope = HA_value(:,ind_X);
+[~,ind_Y] = find(xScope(2,:)>=miny & xScope(2,:)<=maxy);
+HA_crop = xScope(:,ind_Y);
+
+figure;
+scatter3(HA_crop(1,:)',HA_crop(2,:)',HA_crop(3,:)','b','.');hold on;
+scatter3(Yn(1,:)',Yn(2,:)',Yn(3,:)','r','.');
+xlabel('x(mm)');ylabel('y(mm)');zlabel('z(mm)');
+axis([minx*1.1 maxx*1.1 miny*1.1 maxy*1.1]);
+title('fusion area');
+
+%% surface reconstruction
+% 创建ptCloud类
+ptCloudHA = pointCloud(HA_crop');
+ptCloudLA = pointCloud(Yn');
+ptCloud = pcmerge(ptCloudLA,ptCloudHA,0.25);%第三个参数需要研究
+figure;
+pcshow(ptCloud);
+point_out = ptCloud.Location;
+
+% 以下用于curve fitting toolbox使用
+% cloud_x = point_out(:,1);
+% cloud_y = point_out(:,2);
+% cloud_z = point_out(:,3);
+
+% 以下语句用于使用curve fitting toolbox产生的sfit变量
+% 绘制拟合曲面
+% plot(surfacefitted)
+% 取拟合曲面上一点，如(0,0)
+% surfacefitted(0,0)
